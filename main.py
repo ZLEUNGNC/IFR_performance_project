@@ -14,7 +14,18 @@ def main():
 
     lap_number = int(input("Enter lap number: "))
 
-    plot_speed_map(driver1, lap_number)
+
+    driverpd = input("Enter \"driver1\" or \"driver2\": ") #input driver1 or driver2
+
+    if user_input == "driver1":
+        driverpd = driver1
+    elif user_input == "driver2":
+        driverpd = driver2
+    else:
+        driverpd = None
+    print("Warning: Invalid input. driverpd was not set to a DataFrame.")
+
+    plot_speed_map(driverpd, lap_number)
 
 
 if __name__ == "__main__":

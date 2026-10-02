@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+from data_processing import gps_conv
 
 def plot_lap_times(laps):
     plt.plot(
@@ -20,19 +20,13 @@ def plot_lap_times(laps):
     plt.legend()
     plt.show()
 
-
-def plot_speed_map(driver1, lap_number):
-    lap = driver1[driver1["Lap"] == lap_number]
+def plot_speed_map(driverpd, lap_number):
+    lap = driverpd[driverpd["Lap"] == lap_number]
 
     min_speed = lap["GPSSpeed (km/h)"].min()
     max_speed = lap["GPSSpeed (km/h)"].max()
 
-    # Convert GPS coordinates from degrees to metres
-    lat0 = np.radians(lap["GPSLatitude (deg)"].iloc[0])
-    lon0 = np.radians(lap["GPSLongitude (deg)"].iloc[0])
-
-    x = (np.radians(lap["GPSLongitude (deg)"]) - lon0) * 6371000 * np.cos(lat0)
-    y = (np.radians(lap["GPSLatitude (deg)"]) - lat0) * 6371000
+    x,y = gps_conv(driverpd, lap_number)
 
     scale_min = np.floor(min_speed / 10) * 10
     scale_max = np.ceil(max_speed / 10) * 10
@@ -53,3 +47,4 @@ def plot_speed_map(driver1, lap_number):
     plt.title(f"Driver 1 - Lap {lap_number}")
     plt.axis("equal")
     plt.show()
+
