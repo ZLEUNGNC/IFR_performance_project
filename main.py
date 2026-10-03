@@ -1,7 +1,6 @@
-from src.data_processing import load_data, assign_laps
+from src.data_processing import load_data, assign_laps, assign_distance
 from src.lap_analysis import calculate_lap_times
-from src.plotting import plot_lap_times, plot_speed_map
-
+from src.plotting import plot_lap_times, plot_speed_map, interactive_track, compare_drivers
 
 def main():
     driver1, driver2, laps = load_data()
@@ -12,21 +11,18 @@ def main():
 
     plot_lap_times(laps)
 
-    lap_number = int(input("Enter lap number: "))
+    driver1 = assign_distance(driver1)
+    driver2 = assign_distance(driver2)
+
+    # interactive_track(driver1, 2)
+
+    # plot_speed_map(driver1, 3)
 
 
-    driverpd = input("Enter \"driver1\" or \"driver2\": ") #input driver1 or driver2
 
-    if user_input == "driver1":
-        driverpd = driver1
-    elif user_input == "driver2":
-        driverpd = driver2
-    else:
-        driverpd = None
-    print("Warning: Invalid input. driverpd was not set to a DataFrame.")
+    compare_drivers(driver1, driver2, 9)
 
-    plot_speed_map(driverpd, lap_number)
+main()
 
 
-if __name__ == "__main__":
-    main()
+

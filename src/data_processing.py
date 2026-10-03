@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import math
 
 def load_data():
-    driver1 = read_csv("data/D1.csv")
-    driver2 = read_csv("data/D2.csv")
-    laps = read_csv("data/Laps.csv")  # loading csv files onto pandas df
+    driver1 = read_csv(filepath_or_buffer = "data/D1.csv")
+    driver2 = read_csv(filepath_or_buffer = "data/D2.csv")
+    laps = read_csv(filepath_or_buffer = "data/Laps.csv")  # loading csv files onto pandas df
     return driver1, driver2, laps
 
 def assign_laps(driver1, driver2, laps):
@@ -22,30 +22,31 @@ def assign_laps(driver1, driver2, laps):
                 driver2["Time (s)"].to_numpy(),
                 side="right") + 1  # lap number index
 
-def gps_conv(driverpd, lap_number):
-    lap = driverpd[driverpd["Lap"] == lap_number]
+def assign_distance(driver):
+    lat = np.radians(driver["GPSLatitude (deg)"])
+    lon = np.radians(driver["GPSLongitude (deg)"])
 
-    lat0 = np.radians(lap["GPSLatitude (deg)"].iloc[0])
-    lon0 = np.radians(lap["GPSLongitude (deg)"].iloc[0])
+    # Reference point for each lap
+    lat0 = lat.groupby(driver["Lap"]).transform("first")
+    lon0 = lon.groupby(driver["Lap"]).transform("first")
 
-    x = (np.radians(lap["GPSLongitude (deg)"]) - lon0) * 6371000 * np.cos(lat0)
-    y = (np.radians(lap["GPSLatitude (deg)"]) - lat0) * 6371000
-    return x, y
+    R = 6_371_000
 
-def cumdist(driverpd, lap_number):
-    x,y = gps_conv(driverpd, lap_number)
-    xy = zip(x,y)
+    driver["x"] = (lon - lon0) * R * np.cos(lat0)
+    driver["y"] = (lat - lat0) * R
 
-    print(xy)
+    # Distance between consecutive GPS points
+    dx = driver["x"].diff()
+    dy = driver["y"].diff()
 
-load_data()
-cumdist(driver1, 3)
+    point_distance = np.sqrt(dx**2 + dy**2)
 
-    # # Define two points as tuples or lists
-    # point1 = (1, 2)
-    # point2 = (4, 6)
-    #
-    # # Calculate Euclidean distance
-    # distance = math.dist(point1, point2)
-    #
-    # driverpd["distance"] = math.dist(point1, xy[])
+    # Reset cumulative distance at the start of every lap
+    driver["Distance"] = (
+        point_distance
+        .groupby(driver["Lap"])
+        .cumsum()
+        .fillna(0)
+    )
+
+    return driver
