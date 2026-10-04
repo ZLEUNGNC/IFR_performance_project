@@ -8,7 +8,7 @@ Scroll down the right to see more graphs.
 
 There are windows for every graph showing the value at the point.
 
-**Additional Points: **
+**Additional Points:**
 
 I only counted laps 2 to the penultimate lap to avoid messy data (messy start and end points)
 
