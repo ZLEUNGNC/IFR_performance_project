@@ -425,21 +425,21 @@ def compare_drivers(driver1, driver2, lap_number):
         "throttle"
     )
 
-    print(
-        f"D1 brake column: {brake_col1}"
-    )
-
-    print(
-        f"D2 brake column: {brake_col2}"
-    )
-
-    print(
-        f"D1 throttle column: {throttle_col1}"
-    )
-
-    print(
-        f"D2 throttle column: {throttle_col2}"
-    )
+    # print(
+    #     f"D1 brake column: {brake_col1}"
+    # )
+    #
+    # print(
+    #     f"D2 brake column: {brake_col2}"
+    # )
+    #
+    # print(
+    #     f"D1 throttle column: {throttle_col1}"
+    # )
+    #
+    # print(
+    #     f"D2 throttle column: {throttle_col2}"
+    # )
 
     # ======================================================
     # UNIT CONVERSION
@@ -475,7 +475,10 @@ def compare_drivers(driver1, driver2, lap_number):
 
     def throttle_to_percent(series):
 
-        if np.nanmax(np.abs(series)) <= 1.05:
+        if np.nanmax(
+            np.abs(series)
+        ) <= 1.05:
+
             return series * 100
 
         return series
@@ -492,11 +495,21 @@ def compare_drivers(driver1, driver2, lap_number):
     # ACCELERATION
     # ======================================================
 
-    lat_acc1_g = lap1[LAT_ACC_COL].to_numpy()
-    lat_acc2_g = lap2[LAT_ACC_COL].to_numpy()
+    lat_acc1_g = lap1[
+        LAT_ACC_COL
+    ].to_numpy()
 
-    lon_acc1_g = lap1[LON_ACC_COL].to_numpy()
-    lon_acc2_g = lap2[LON_ACC_COL].to_numpy()
+    lat_acc2_g = lap2[
+        LAT_ACC_COL
+    ].to_numpy()
+
+    lon_acc1_g = lap1[
+        LON_ACC_COL
+    ].to_numpy()
+
+    lon_acc2_g = lap2[
+        LON_ACC_COL
+    ].to_numpy()
 
     g = 9.80665
 
@@ -533,14 +546,21 @@ def compare_drivers(driver1, driver2, lap_number):
     # FIND NEAREST POINT
     # ======================================================
 
-    def find_nearest(x, y, mouse_x, mouse_y):
+    def find_nearest(
+        x,
+        y,
+        mouse_x,
+        mouse_y
+    ):
 
         distances = (
             (x - mouse_x) ** 2
             + (y - mouse_y) ** 2
         )
 
-        return np.argmin(distances)
+        return np.argmin(
+            distances
+        )
 
     # ======================================================
     # PHYSICAL MATCHING
@@ -553,7 +573,10 @@ def compare_drivers(driver1, driver2, lap_number):
             x,
             y
         )
-        for x, y in zip(x1, y1)
+        for x, y in zip(
+            x1,
+            y1
+        )
     ])
 
     match1_for_d2 = np.array([
@@ -563,17 +586,41 @@ def compare_drivers(driver1, driver2, lap_number):
             x,
             y
         )
-        for x, y in zip(x2, y2)
+        for x, y in zip(
+            x2,
+            y2
+        )
     ])
 
     # ======================================================
     # D2 - D1 TIME DIFFERENCE
     # ======================================================
 
-    delta_time = (
-        t2_rel[match2_for_d1]
-        - t1_rel
+    # Remove duplicate distance values from D2
+    d2_unique, unique_indices = np.unique(
+        d2,
+        return_index=True
     )
+
+    t2_unique = t2_rel[
+        unique_indices
+    ]
+
+    # Find D2's elapsed time at each D1 distance
+    d2_time_at_d1 = np.interp(
+        d1,
+        d2_unique,
+        t2_unique
+    )
+
+    # D2 - D1
+    delta_time = (
+            d2_time_at_d1
+            - t1_rel
+    )
+
+    # Both drivers start at zero
+    delta_time -= delta_time[0]
 
     # ======================================================
     # ROOT WINDOW
@@ -594,6 +641,15 @@ def compare_drivers(driver1, driver2, lap_number):
         700
     )
 
+    # ======================================================
+    # MAIN LAYOUT
+    #
+    # EXACTLY:
+    #
+    # LEFT  = 1/3
+    # RIGHT = 2/3
+    # ======================================================
+
     root.grid_rowconfigure(
         0,
         weight=1
@@ -601,19 +657,25 @@ def compare_drivers(driver1, driver2, lap_number):
 
     root.grid_columnconfigure(
         0,
-        weight=1
+        weight=1,
+        uniform="main"
     )
 
     root.grid_columnconfigure(
         1,
-        weight=2
+        weight=2,
+        uniform="main"
     )
 
     # ======================================================
     # LEFT FIXED PANEL
     # ======================================================
 
-    left_frame = tk.Frame(root)
+    left_frame = tk.Frame(
+        root,
+        bd=0,
+        highlightthickness=0
+    )
 
     left_frame.grid(
         row=0,
@@ -625,7 +687,11 @@ def compare_drivers(driver1, driver2, lap_number):
     # RIGHT SCROLLABLE PANEL
     # ======================================================
 
-    right_frame = tk.Frame(root)
+    right_frame = tk.Frame(
+        root,
+        bd=0,
+        highlightthickness=0
+    )
 
     right_frame.grid(
         row=0,
@@ -645,7 +711,8 @@ def compare_drivers(driver1, driver2, lap_number):
 
     right_canvas = tk.Canvas(
         right_frame,
-        highlightthickness=0
+        highlightthickness=0,
+        bd=0
     )
 
     right_scrollbar = tk.Scrollbar(
@@ -671,7 +738,9 @@ def compare_drivers(driver1, driver2, lap_number):
     )
 
     right_content = tk.Frame(
-        right_canvas
+        right_canvas,
+        bd=0,
+        highlightthickness=0
     )
 
     right_window = right_canvas.create_window(
@@ -704,15 +773,20 @@ def compare_drivers(driver1, driver2, lap_number):
     )
 
     # ======================================================
-    # MOUSE WHEEL FOR RIGHT PANEL
+    # RIGHT MOUSE WHEEL
     # ======================================================
 
     def scroll_right(event):
 
-        if hasattr(event, "delta") and event.delta != 0:
+        if (
+            hasattr(event, "delta")
+            and event.delta != 0
+        ):
 
             right_canvas.yview_scroll(
-                int(-event.delta / 120),
+                int(
+                    -event.delta / 120
+                ),
                 "units"
             )
 
@@ -738,49 +812,72 @@ def compare_drivers(driver1, driver2, lap_number):
 
     # ======================================================
     # LEFT FIGURE
+    #
+    # TRACKS ≈ 5/8
+    # G-G ≈ 3/16
+    # LAT G/SPEED ≈ 3/16
+    #
+    # Extremely small margins.
     # ======================================================
 
     left_fig = plt.Figure(
-        figsize=(6, 10),
+        figsize=(7.0, 12.0),
         dpi=100
     )
 
     left_gs = left_fig.add_gridspec(
-        4,
         3,
+        2,
+
         height_ratios=[
-            1.05,
-            1.05,
-            0.10,
-            0.90
+            3.3,
+            1.0,
+            1.0
         ],
-        width_ratios=[
-            1,
-            1,
-            0.07
-        ],
-        hspace=0.55,
-        wspace=0.30
+
+        hspace=0.22,
+        wspace=0.10,
+
+        left=0.005,
+        right=0.995,
+        top=0.995,
+        bottom=0.015
     )
 
+    # ======================================================
+    # TRACK AXES
+    # ======================================================
+
     ax1 = left_fig.add_subplot(
-        left_gs[0, 0:2]
+        left_gs[0, 0]
     )
 
     ax2 = left_fig.add_subplot(
-        left_gs[1, 0:2]
+        left_gs[0, 1]
     )
 
-    cax = left_fig.add_subplot(
-        left_gs[0:2, 2]
+    # ======================================================
+    # G-G AXES
+    # ======================================================
+
+    ax_gg1 = left_fig.add_subplot(
+        left_gs[1, 0]
     )
 
-    ax_gg = left_fig.add_subplot(
-        left_gs[3, 0]
+    ax_gg2 = left_fig.add_subplot(
+        left_gs[1, 1]
     )
 
-    ax_lat_speed = left_fig.add_subplot(
-        left_gs[3, 1]
+    # ======================================================
+    # LATERAL G VS SPEED AXES
+    # ======================================================
+
+    ax_lat_speed1 = left_fig.add_subplot(
+        left_gs[2, 0]
+    )
+
+    ax_lat_speed2 = left_fig.add_subplot(
+        left_gs[2, 1]
     )
 
     # ======================================================
@@ -788,40 +885,54 @@ def compare_drivers(driver1, driver2, lap_number):
     # ======================================================
 
     right_fig = plt.Figure(
-        figsize=(11, 24),
+        figsize=(12.5, 34),
         dpi=100
     )
 
     right_gs = right_fig.add_gridspec(
-        4,
+        6,
         1,
         height_ratios=[
-            1.0,
-            1.15,
-            1.0,
-            1.0
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
         ],
-        hspace=0.55
+        hspace=0.45,
+        left=0.07,
+        right=0.985,
+        top=0.99,
+        bottom=0.02
     )
 
     ax_speed = right_fig.add_subplot(
         right_gs[0, 0]
     )
 
-    ax_control = right_fig.add_subplot(
+    ax_brake = right_fig.add_subplot(
         right_gs[1, 0]
     )
 
-    ax_delta = right_fig.add_subplot(
+    ax_throttle = right_fig.add_subplot(
         right_gs[2, 0]
     )
 
-    ax_lat_distance = right_fig.add_subplot(
+    ax_long_distance = right_fig.add_subplot(
         right_gs[3, 0]
     )
 
+    ax_lat_distance = right_fig.add_subplot(
+        right_gs[5, 0]
+    )
+
+    ax_delta = right_fig.add_subplot(
+        right_gs[4, 0]
+    )
+
     # ======================================================
-    # EMBED FIGURES
+    # EMBED LEFT FIGURE
     # ======================================================
 
     left_mpl = FigureCanvasTkAgg(
@@ -831,12 +942,20 @@ def compare_drivers(driver1, driver2, lap_number):
 
     left_mpl.draw()
 
-    left_mpl_widget = left_mpl.get_tk_widget()
+    left_mpl_widget = (
+        left_mpl.get_tk_widget()
+    )
 
     left_mpl_widget.pack(
         fill="both",
-        expand=True
+        expand=True,
+        padx=0,
+        pady=0
     )
+
+    # ======================================================
+    # EMBED RIGHT FIGURE
+    # ======================================================
 
     right_mpl = FigureCanvasTkAgg(
         right_fig,
@@ -845,12 +964,20 @@ def compare_drivers(driver1, driver2, lap_number):
 
     right_mpl.draw()
 
-    right_mpl_widget = right_mpl.get_tk_widget()
+    right_mpl_widget = (
+        right_mpl.get_tk_widget()
+    )
 
     right_mpl_widget.pack(
         fill="both",
-        expand=True
+        expand=True,
+        padx=0,
+        pady=0
     )
+
+    # ======================================================
+    # RIGHT SCROLL EVENTS
+    # ======================================================
 
     right_mpl_widget.bind(
         "<MouseWheel>",
@@ -892,22 +1019,16 @@ def compare_drivers(driver1, driver2, lap_number):
         c=s1,
         cmap="turbo",
         norm=speed_norm,
-        s=6
+        s=5
     )
 
-    ax2.scatter(
+    scatter2 = ax2.scatter(
         x2,
         y2,
         c=s2,
         cmap="turbo",
         norm=speed_norm,
-        s=6
-    )
-
-    left_fig.colorbar(
-        scatter1,
-        cax=cax,
-        label="Speed (km/h)"
+        s=5
     )
 
     # ======================================================
@@ -915,21 +1036,78 @@ def compare_drivers(driver1, driver2, lap_number):
     # ======================================================
 
     ax1.set_title(
-        f"Driver 1 - Lap {lap_number}"
+        "D1 Track",
+        fontsize=12,
+        pad=3
     )
 
     ax2.set_title(
-        f"Driver 2 - Lap {lap_number}"
+        "D2 Track",
+        fontsize=12,
+        pad=3
     )
 
-    ax1.set_xlabel("x (m)")
-    ax1.set_ylabel("y (m)")
+    ax1.set_aspect(
+        "equal",
+        adjustable="box"
+    )
 
-    ax2.set_xlabel("x (m)")
-    ax2.set_ylabel("y (m)")
+    ax2.set_aspect(
+        "equal",
+        adjustable="box"
+    )
 
-    ax1.set_aspect("equal")
-    ax2.set_aspect("equal")
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+
+    ax2.set_xticks([])
+    ax2.set_yticks([])
+
+    # ------------------------------------------------------
+    # Tight track limits
+    # ------------------------------------------------------
+
+    x_range1 = max(
+        x1.max() - x1.min(),
+        1
+    )
+
+    y_range1 = max(
+        y1.max() - y1.min(),
+        1
+    )
+
+    x_range2 = max(
+        x2.max() - x2.min(),
+        1
+    )
+
+    y_range2 = max(
+        y2.max() - y2.min(),
+        1
+    )
+
+    # Only 2.5% padding around the actual track
+
+    ax1.set_xlim(
+        x1.min() - 0.025 * x_range1,
+        x1.max() + 0.025 * x_range1
+    )
+
+    ax1.set_ylim(
+        y1.min() - 0.025 * y_range1,
+        y1.max() + 0.025 * y_range1
+    )
+
+    ax2.set_xlim(
+        x2.min() - 0.025 * x_range2,
+        x2.max() + 0.025 * x_range2
+    )
+
+    ax2.set_ylim(
+        y2.min() - 0.025 * y_range2,
+        y2.max() + 0.025 * y_range2
+    )
 
     # ======================================================
     # TRIANGLES
@@ -959,40 +1137,283 @@ def compare_drivers(driver1, driver2, lap_number):
         zorder=20
     )
 
-    ax1.add_patch(triangle1)
-    ax2.add_patch(triangle2)
+    ax1.add_patch(
+        triangle1
+    )
+
+    ax2.add_patch(
+        triangle2
+    )
 
     # ======================================================
     # TRACK INFORMATION
     # ======================================================
 
     text1 = ax1.text(
-        0.02,
-        0.97,
+        0.98,
+        0.98,
         "",
         transform=ax1.transAxes,
-        fontsize=9,
+        fontsize=8,
         verticalalignment="top",
+        horizontalalignment="right",
         bbox=dict(
-            boxstyle="round,pad=0.3",
+            boxstyle="round,pad=0.20",
             facecolor="white",
             alpha=0.8
-        )
+        ),
+        zorder=30
     )
 
     text2 = ax2.text(
-        0.02,
-        0.97,
+        0.98,
+        0.98,
         "",
         transform=ax2.transAxes,
-        fontsize=9,
+        fontsize=8,
         verticalalignment="top",
+        horizontalalignment="right",
         bbox=dict(
-            boxstyle="round,pad=0.3",
+            boxstyle="round,pad=0.20",
             facecolor="white",
             alpha=0.8
+        ),
+        zorder=30
+    )
+
+    # ======================================================
+    # G-G FORMATTING
+    # ======================================================
+
+    for ax, title in [
+        (ax_gg1, "D1 G-G"),
+        (ax_gg2, "D2 G-G")
+    ]:
+
+        ax.set_title(
+            title,
+            fontsize=10,
+            pad=2
+        )
+
+        ax.set_xlabel(
+            "Lateral G",
+            fontsize=8,
+            labelpad=1
+        )
+
+        ax.set_ylabel(
+            "Longitudinal G",
+            fontsize=8,
+            labelpad=1
+        )
+
+        ax.tick_params(
+            labelsize=7,
+            pad=1
+        )
+
+        ax.grid(
+            True,
+            alpha=0.2
+        )
+
+        ax.axhline(
+            0,
+            color="black",
+            linewidth=0.7,
+            alpha=0.4
+        )
+
+        ax.axvline(
+            0,
+            color="black",
+            linewidth=0.7,
+            alpha=0.4
+        )
+
+        ax.set_aspect(
+            "equal",
+            adjustable="box"
+        )
+
+    # ======================================================
+    # G-G LIMITS
+    # ======================================================
+
+    gg_max = np.nanmax(
+        np.abs(
+            np.concatenate([
+                lat_acc1_g,
+                lat_acc2_g,
+                lon_acc1_g,
+                lon_acc2_g
+            ])
         )
     )
+
+    if (
+        not np.isfinite(gg_max)
+        or gg_max == 0
+    ):
+
+        gg_max = 1.0
+
+    gg_max *= 1.10
+
+    ax_gg1.set_xlim(
+        -gg_max,
+        gg_max
+    )
+
+    ax_gg1.set_ylim(
+        -gg_max,
+        gg_max
+    )
+
+    ax_gg2.set_xlim(
+        -gg_max,
+        gg_max
+    )
+
+    ax_gg2.set_ylim(
+        -gg_max,
+        gg_max
+    )
+
+    # ======================================================
+    # FULL G-G TRACE
+    # ======================================================
+
+    ax_gg1.plot(
+        lat_acc1_g,
+        lon_acc1_g,
+        color=D1_COLOUR,
+        alpha=0.10,
+        linewidth=1
+    )
+
+    ax_gg2.plot(
+        lat_acc2_g,
+        lon_acc2_g,
+        color=D2_COLOUR,
+        alpha=0.10,
+        linewidth=1
+    )
+
+    # ======================================================
+    # DECAYING G-G TRAILS
+    # ======================================================
+
+    gg_trail1 = LineCollection(
+        [],
+        linewidths=1.8,
+        zorder=5
+    )
+
+    gg_trail2 = LineCollection(
+        [],
+        linewidths=1.8,
+        zorder=5
+    )
+
+    ax_gg1.add_collection(
+        gg_trail1
+    )
+
+    ax_gg2.add_collection(
+        gg_trail2
+    )
+
+    # ======================================================
+    # G-G CURRENT POINTS
+    # ======================================================
+
+    gg_marker1, = ax_gg1.plot(
+        [lat_acc1_g[0]],
+        [lon_acc1_g[0]],
+        marker="o",
+        markersize=4,
+        color=D1_COLOUR,
+        linestyle="",
+        zorder=10
+    )
+
+    gg_marker2, = ax_gg2.plot(
+        [lat_acc2_g[0]],
+        [lon_acc2_g[0]],
+        marker="o",
+        markersize=4,
+        color=D2_COLOUR,
+        linestyle="",
+        zorder=10
+    )
+
+    # ======================================================
+    # LATERAL G VS SPEED
+    # ======================================================
+
+    ax_lat_speed1.scatter(
+        s1,
+        lat_acc1_g,
+        s=5,
+        color=D1_COLOUR,
+        alpha=0.20
+    )
+
+    ax_lat_speed2.scatter(
+        s2,
+        lat_acc2_g,
+        s=5,
+        color=D2_COLOUR,
+        alpha=0.20
+    )
+
+    for ax, title in [
+        (
+            ax_lat_speed1,
+            "D1 Lateral G vs Speed"
+        ),
+        (
+            ax_lat_speed2,
+            "D2 Lateral G vs Speed"
+        )
+    ]:
+
+        ax.axhline(
+            0,
+            color="black",
+            linewidth=0.7,
+            alpha=0.4
+        )
+
+        ax.set_title(
+            title,
+            fontsize=10,
+            pad=2
+        )
+
+        ax.set_xlabel(
+            "Speed (km/h)",
+            fontsize=8,
+            labelpad=1
+        )
+
+        ax.set_ylabel(
+            "Lateral G",
+            fontsize=8,
+            labelpad=1
+        )
+
+        ax.tick_params(
+            labelsize=7,
+            pad=1
+        )
+
+        ax.grid(
+            True,
+            alpha=0.2
+        )
 
     # ======================================================
     # SPEED VS DISTANCE
@@ -1032,101 +1453,66 @@ def compare_drivers(driver1, driver2, lap_number):
     ax_speed.legend()
 
     # ======================================================
-    # SPEED ARROWS
+    # BRAKE PRESSURE VS DISTANCE
     # ======================================================
 
-    speed_arrow1 = ax_speed.annotate(
-        "",
-        xy=(d1[0], s1[0]),
-        xycoords="data",
-        xytext=(0.98, 0.98),
-        textcoords="axes fraction",
-        ha="right",
-        va="top",
-        arrowprops=dict(
-            arrowstyle="->",
-            color=D1_COLOUR,
-            linewidth=1.5
-        ),
-        bbox=dict(
-            boxstyle="round,pad=0.4",
-            facecolor="white",
-            edgecolor=D1_COLOUR,
-            alpha=0.9
-        )
-    )
-
-    speed_arrow2 = ax_speed.annotate(
-        "",
-        xy=(d2[0], s2[0]),
-        xycoords="data",
-        xytext=(0.98, 0.74),
-        textcoords="axes fraction",
-        ha="right",
-        va="top",
-        arrowprops=dict(
-            arrowstyle="->",
-            color=D2_COLOUR,
-            linewidth=1.5
-        ),
-        bbox=dict(
-            boxstyle="round,pad=0.4",
-            facecolor="white",
-            edgecolor=D2_COLOUR,
-            alpha=0.9
-        )
-    )
-
-    # ======================================================
-    # BRAKE / THROTTLE / LONG ACCEL
-    # ======================================================
-
-    brake_line1, = ax_control.plot(
+    ax_brake.plot(
         d1,
         brake1,
         color=D1_COLOUR,
-        linestyle="-",
-        label="D1 Brake"
+        label="Driver 1"
     )
 
-    brake_line2, = ax_control.plot(
+    ax_brake.plot(
         d2,
         brake2,
         color=D2_COLOUR,
-        linestyle="-",
-        label="D2 Brake"
+        label="Driver 2"
     )
 
-    ax_control.set_ylabel(
-        "Brake pressure (Pa)"
+    ax_brake.set_title(
+        "Brake Pressure vs Distance"
     )
 
-    ax_control.set_xlabel(
+    ax_brake.set_xlabel(
         "Distance (m)"
     )
 
-    ax_control.grid(
+    ax_brake.set_ylabel(
+        "Brake Pressure (Pa)"
+    )
+
+    ax_brake.grid(
         True,
         alpha=0.3
     )
 
-    # Throttle - right axis
-    ax_throttle = ax_control.twinx()
+    ax_brake.legend()
 
-    throttle_line1, = ax_throttle.plot(
+    # ======================================================
+    # THROTTLE VS DISTANCE
+    # ======================================================
+
+    ax_throttle.plot(
         d1,
         throttle1,
         color=D1_COLOUR,
-        linestyle="--",
-        label="D1 Throttle"
+        label="Driver 1"
     )
 
-    throttle_line2, = ax_throttle.plot(
+    ax_throttle.plot(
         d2,
         throttle2,
         color=D2_COLOUR,
-        linestyle="--",
-        label="D2 Throttle"
+        label="Driver 2"
+    )
+
+    ax_throttle.set_title(
+        "Throttle vs Distance"
+    )
+
+    ax_throttle.set_xlabel(
+        "Distance (m)"
     )
 
     ax_throttle.set_ylabel(
@@ -1134,148 +1520,60 @@ def compare_drivers(driver1, driver2, lap_number):
     )
 
     ax_throttle.set_ylim(
-        0,
-        100
+        -10,
+        105
     )
 
-    # Longitudinal acceleration - second left axis
-    ax_accel = ax_control.twinx()
-
-    ax_accel.spines["right"].set_visible(False)
-
-    ax_accel.spines["left"].set_position(
-        ("axes", -0.10)
+    ax_throttle.grid(
+        True,
+        alpha=0.3
     )
 
-    ax_accel.spines["left"].set_visible(True)
+    ax_throttle.legend()
 
-    ax_accel.yaxis.set_label_position(
-        "left"
-    )
+    # ======================================================
+    # LONGITUDINAL ACCELERATION VS DISTANCE
+    # ======================================================
 
-    ax_accel.yaxis.set_ticks_position(
-        "left"
-    )
-
-    accel_line1, = ax_accel.plot(
+    ax_long_distance.plot(
         d1,
         lon_acc1,
         color=D1_COLOUR,
-        linestyle=":",
-        label="D1 Long Accel"
+        label="Driver 1"
     )
 
-    accel_line2, = ax_accel.plot(
+    ax_long_distance.plot(
         d2,
         lon_acc2,
         color=D2_COLOUR,
-        linestyle=":",
-        label="D2 Long Accel"
+        label="Driver 2"
     )
 
-    ax_accel.set_ylabel(
-        "Longitudinal acceleration (m/s²)"
+    ax_long_distance.axhline(
+        0,
+        color="black",
+        linewidth=0.8,
+        alpha=0.4
     )
 
-    ax_control.set_title(
-        "Brake Pressure / Throttle / Longitudinal Acceleration"
+    ax_long_distance.set_title(
+        "Longitudinal G vs Distance"
     )
 
-    # Combined legend
-    control_handles = [
-        Line2D(
-            [0],
-            [0],
-            color=D1_COLOUR,
-            linestyle="-",
-            label="Driver 1 Brake"
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=D2_COLOUR,
-            linestyle="-",
-            label="Driver 2 Brake"
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=D1_COLOUR,
-            linestyle="--",
-            label="Driver 1 Throttle"
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=D2_COLOUR,
-            linestyle="--",
-            label="Driver 2 Throttle"
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=D1_COLOUR,
-            linestyle=":",
-            label="Driver 1 Long Accel"
-        ),
-        Line2D(
-            [0],
-            [0],
-            color=D2_COLOUR,
-            linestyle=":",
-            label="Driver 2 Long Accel"
-        )
-    ]
-
-    ax_control.legend(
-        handles=control_handles,
-        fontsize=8,
-        ncol=2,
-        loc="upper left"
+    ax_long_distance.set_xlabel(
+        "Distance (m)"
     )
 
-    # Control arrows
-    control_arrow1 = ax_control.annotate(
-        "",
-        xy=(d1[0], brake1[0]),
-        xycoords="data",
-        xytext=(0.98, 0.98),
-        textcoords="axes fraction",
-        ha="right",
-        va="top",
-        arrowprops=dict(
-            arrowstyle="->",
-            color=D1_COLOUR,
-            linewidth=1.5
-        ),
-        bbox=dict(
-            boxstyle="round,pad=0.4",
-            facecolor="white",
-            edgecolor=D1_COLOUR,
-            alpha=0.9
-        )
+    ax_long_distance.set_ylabel(
+        "Longitudinal acceleration (g)"
     )
 
-    control_arrow2 = ax_control.annotate(
-        "",
-        xy=(d2[0], brake2[0]),
-        xycoords="data",
-        xytext=(0.98, 0.69),
-        textcoords="axes fraction",
-        ha="right",
-        va="top",
-        arrowprops=dict(
-            arrowstyle="->",
-            color=D2_COLOUR,
-            linewidth=1.5
-        ),
-        bbox=dict(
-            boxstyle="round,pad=0.4",
-            facecolor="white",
-            edgecolor=D2_COLOUR,
-            alpha=0.9
-        )
+    ax_long_distance.grid(
+        True,
+        alpha=0.3
     )
+
+    ax_long_distance.legend()
 
     # ======================================================
     # D2 - D1 TIME
@@ -1295,7 +1593,7 @@ def compare_drivers(driver1, driver2, lap_number):
     )
 
     ax_delta.set_title(
-        "D2 - D1 Time Difference"
+        "D2 − D1 Time Difference"
     )
 
     ax_delta.set_xlabel(
@@ -1309,27 +1607,6 @@ def compare_drivers(driver1, driver2, lap_number):
     ax_delta.grid(
         True,
         alpha=0.3
-    )
-
-    delta_arrow = ax_delta.annotate(
-        "",
-        xy=(d1[0], delta_time[0]),
-        xycoords="data",
-        xytext=(0.98, 0.98),
-        textcoords="axes fraction",
-        ha="right",
-        va="top",
-        arrowprops=dict(
-            arrowstyle="->",
-            color="black",
-            linewidth=1.5
-        ),
-        bbox=dict(
-            boxstyle="round,pad=0.4",
-            facecolor="white",
-            edgecolor="black",
-            alpha=0.9
-        )
     )
 
     # ======================================================
@@ -1376,245 +1653,340 @@ def compare_drivers(driver1, driver2, lap_number):
 
     ax_lat_distance.legend()
 
-    lat_distance_arrow1 = ax_lat_distance.annotate(
-        "",
-        xy=(d1[0], lat_acc1_g[0]),
-        xycoords="data",
-        xytext=(0.98, 0.98),
-        textcoords="axes fraction",
-        ha="right",
-        va="top",
-        arrowprops=dict(
-            arrowstyle="->",
-            color=D1_COLOUR,
-            linewidth=1.5
-        ),
-        bbox=dict(
-            boxstyle="round,pad=0.4",
-            facecolor="white",
-            edgecolor=D1_COLOUR,
-            alpha=0.9
-        )
-    )
-
-    lat_distance_arrow2 = ax_lat_distance.annotate(
-        "",
-        xy=(d2[0], lat_acc2_g[0]),
-        xycoords="data",
-        xytext=(0.98, 0.72),
-        textcoords="axes fraction",
-        ha="right",
-        va="top",
-        arrowprops=dict(
-            arrowstyle="->",
-            color=D2_COLOUR,
-            linewidth=1.5
-        ),
-        bbox=dict(
-            boxstyle="round,pad=0.4",
-            facecolor="white",
-            edgecolor=D2_COLOUR,
-            alpha=0.9
-        )
-    )
-
     # ======================================================
-    # G-G DIAGRAM
+    # POINT LABEL
     # ======================================================
 
-    ax_gg.set_title(
-        "G-G Diagram"
-    )
+    def make_point_label(
+        ax,
+        colour,
+        text
+    ):
 
-    ax_gg.set_xlabel(
-        "Lateral acceleration (g)"
-    )
-
-    ax_gg.set_ylabel(
-        "Longitudinal acceleration (g)"
-    )
-
-    ax_gg.grid(
-        True,
-        alpha=0.2
-    )
-
-    ax_gg.axhline(
-        0,
-        color="black",
-        linewidth=0.7,
-        alpha=0.4
-    )
-
-    ax_gg.axvline(
-        0,
-        color="black",
-        linewidth=0.7,
-        alpha=0.4
-    )
-
-    # Full faint traces
-    ax_gg.plot(
-        lat_acc1_g,
-        lon_acc1_g,
-        color=D1_COLOUR,
-        alpha=0.10,
-        linewidth=1
-    )
-
-    ax_gg.plot(
-        lat_acc2_g,
-        lon_acc2_g,
-        color=D2_COLOUR,
-        alpha=0.10,
-        linewidth=1
-    )
-
-    ax_gg.set_aspect(
-        "equal",
-        adjustable="box"
-    )
-
-    gg_max = np.nanmax(
-        np.abs(
-            np.concatenate([
-                lat_acc1_g,
-                lat_acc2_g,
-                lon_acc1_g,
-                lon_acc2_g
-            ])
-        )
-    )
-
-    if not np.isfinite(gg_max) or gg_max == 0:
-        gg_max = 1.0
-
-    gg_max *= 1.10
-
-    ax_gg.set_xlim(
-        -gg_max,
-        gg_max
-    )
-
-    ax_gg.set_ylim(
-        -gg_max,
-        gg_max
-    )
-
-    # Decaying trails
-    gg_trail1 = LineCollection(
-        [],
-        linewidths=1.8,
-        zorder=5
-    )
-
-    gg_trail2 = LineCollection(
-        [],
-        linewidths=1.8,
-        zorder=5
-    )
-
-    ax_gg.add_collection(
-        gg_trail1
-    )
-
-    ax_gg.add_collection(
-        gg_trail2
-    )
-
-    # Small current-position dots
-    gg_marker1, = ax_gg.plot(
-        [lat_acc1_g[0]],
-        [lon_acc1_g[0]],
-        marker="o",
-        markersize=4,
-        color=D1_COLOUR,
-        linestyle="",
-        zorder=10
-    )
-
-    gg_marker2, = ax_gg.plot(
-        [lat_acc2_g[0]],
-        [lon_acc2_g[0]],
-        marker="o",
-        markersize=4,
-        color=D2_COLOUR,
-        linestyle="",
-        zorder=10
-    )
-
-    ax_gg.legend(
-        handles=[
-            Line2D(
-                [0],
-                [0],
-                color=D1_COLOUR,
-                label="Driver 1"
+        return ax.annotate(
+            text,
+            xy=(0, 0),
+            xycoords="data",
+            xytext=(0, 9),
+            textcoords="offset points",
+            ha="center",
+            va="bottom",
+            fontsize=7,
+            color=colour,
+            bbox=dict(
+                boxstyle="round,pad=0.20",
+                facecolor="white",
+                edgecolor=colour,
+                alpha=0.85
             ),
-            Line2D(
-                [0],
-                [0],
-                color=D2_COLOUR,
-                label="Driver 2"
-            )
-        ],
-        fontsize=8,
-        loc="lower right"
+            zorder=30
+        )
+
+    # ======================================================
+    # SPEED LABELS
+    # ======================================================
+
+    speed_label1 = make_point_label(
+        ax_speed,
+        D1_COLOUR,
+        ""
+    )
+
+    speed_label2 = make_point_label(
+        ax_speed,
+        D2_COLOUR,
+        ""
     )
 
     # ======================================================
-    # LATERAL G VS SPEED
-    # STATIC SCATTER
+    # BRAKE LABELS
     # ======================================================
 
-    ax_lat_speed.scatter(
-        s1,
-        lat_acc1_g,
-        s=5,
-        color=D1_COLOUR,
-        alpha=0.20,
-        label="Driver 1"
+    brake_label1 = make_point_label(
+        ax_brake,
+        D1_COLOUR,
+        ""
     )
 
-    ax_lat_speed.scatter(
-        s2,
-        lat_acc2_g,
-        s=5,
-        color=D2_COLOUR,
-        alpha=0.20,
-        label="Driver 2"
+    brake_label2 = make_point_label(
+        ax_brake,
+        D2_COLOUR,
+        ""
     )
 
-    ax_lat_speed.axhline(
-        0,
-        color="black",
-        linewidth=0.7,
-        alpha=0.4
+    # ======================================================
+    # THROTTLE LABELS
+    # ======================================================
+
+    throttle_label1 = make_point_label(
+        ax_throttle,
+        D1_COLOUR,
+        ""
     )
 
-    ax_lat_speed.set_title(
-        "Lateral G vs Speed"
+    throttle_label2 = make_point_label(
+        ax_throttle,
+        D2_COLOUR,
+        ""
     )
 
-    ax_lat_speed.set_xlabel(
-        "Speed (km/h)"
+    # ======================================================
+    # LONG ACCEL LABELS
+    # ======================================================
+
+    accel_label1 = make_point_label(
+        ax_long_distance,
+        D1_COLOUR,
+        ""
     )
 
-    ax_lat_speed.set_ylabel(
-        "Lateral G"
+    accel_label2 = make_point_label(
+        ax_long_distance,
+        D2_COLOUR,
+        ""
     )
 
-    ax_lat_speed.grid(
-        True,
-        alpha=0.2
+    # ======================================================
+    # DELTA LABEL
+    # ======================================================
+
+    delta_label = make_point_label(
+        ax_delta,
+        "black",
+        ""
     )
 
-    ax_lat_speed.legend(
-        fontsize=8
+    # ======================================================
+    # LATERAL G LABELS
+    # ======================================================
+
+    lat_label1 = make_point_label(
+        ax_lat_distance,
+        D1_COLOUR,
+        ""
+    )
+
+    lat_label2 = make_point_label(
+        ax_lat_distance,
+        D2_COLOUR,
+        ""
     )
 
     # ======================================================
     # MASTER UPDATE
+    # ======================================================
+
+    def update_position(index1):
+
+        # --------------------------------------------------
+        # MATCH D2 PHYSICAL POSITION
+        # --------------------------------------------------
+
+        index2 = match2_for_d1[
+            index1
+        ]
+
+        # --------------------------------------------------
+        # TRACKS
+        # --------------------------------------------------
+
+        move_triangle(
+            triangle1,
+            x1,
+            y1,
+            index1
+        )
+
+        move_triangle(
+            triangle2,
+            x2,
+            y2,
+            index2
+        )
+
+        # --------------------------------------------------
+        # TRACK TEXT
+        # --------------------------------------------------
+
+        text1.set_text(
+            f"D1\n"
+            f"{d1[index1]:.1f} m\n"
+            f"{s1[index1]:.1f} km/h"
+        )
+
+        text2.set_text(
+            f"D2\n"
+            f"{d2[index2]:.1f} m\n"
+            f"{s2[index2]:.1f} km/h"
+        )
+
+        # --------------------------------------------------
+        # SPEED
+        # --------------------------------------------------
+
+        speed_label1.xy = (
+            d1[index1],
+            s1[index1]
+        )
+
+        speed_label1.set_text(
+            f"D1  {s1[index1]:.1f} km/h"
+        )
+
+        speed_label2.xy = (
+            d2[index2],
+            s2[index2]
+        )
+
+        speed_label2.set_text(
+            f"D2  {s2[index2]:.1f} km/h"
+        )
+
+        # --------------------------------------------------
+        # BRAKE
+        # --------------------------------------------------
+
+        brake_label1.xy = (
+            d1[index1],
+            brake1[index1]
+        )
+
+        brake_label1.set_text(
+            f"D1  {brake1[index1]:.0f} Pa"
+        )
+
+        brake_label2.xy = (
+            d2[index2],
+            brake2[index2]
+        )
+
+        brake_label2.set_text(
+            f"D2  {brake2[index2]:.0f} Pa"
+        )
+
+        # --------------------------------------------------
+        # THROTTLE
+        # --------------------------------------------------
+
+        throttle_label1.xy = (
+            d1[index1],
+            throttle1[index1]
+        )
+
+        throttle_label1.set_text(
+            f"D1  {throttle1[index1]:.1f}%"
+        )
+
+        throttle_label2.xy = (
+            d2[index2],
+            throttle2[index2]
+        )
+
+        throttle_label2.set_text(
+            f"D2  {throttle2[index2]:.1f}%"
+        )
+
+        # --------------------------------------------------
+        # LONGITUDINAL ACCELERATION
+        # --------------------------------------------------
+
+        accel_label1.xy = (
+            d1[index1],
+            lon_acc1[index1]
+        )
+
+        accel_label1.set_text(
+            f"D1  {lon_acc1[index1]:+.2f}"
+        )
+
+        accel_label2.xy = (
+            d2[index2],
+            lon_acc2[index2]
+        )
+
+        accel_label2.set_text(
+            f"D2  {lon_acc2[index2]:+.2f}"
+        )
+
+        # --------------------------------------------------
+        # TIME DIFFERENCE
+        # --------------------------------------------------
+
+        delta_label.xy = (
+            d1[index1],
+            delta_time[index1]
+        )
+
+        delta_label.set_text(
+            f"Δt {delta_time[index1]:+.3f}s"
+        )
+
+        # --------------------------------------------------
+        # LATERAL G
+        # --------------------------------------------------
+
+        lat_label1.xy = (
+            d1[index1],
+            lat_acc1_g[index1]
+        )
+
+        lat_label1.set_text(
+            f"D1  {lat_acc1_g[index1]:+.2f}g"
+        )
+
+        lat_label2.xy = (
+            d2[index2],
+            lat_acc2_g[index2]
+        )
+
+        lat_label2.set_text(
+            f"D2  {lat_acc2_g[index2]:+.2f}g"
+        )
+
+        # --------------------------------------------------
+        # G-G MARKERS
+        # --------------------------------------------------
+
+        gg_marker1.set_data(
+            [lat_acc1_g[index1]],
+            [lon_acc1_g[index1]]
+        )
+
+        gg_marker2.set_data(
+            [lat_acc2_g[index2]],
+            [lon_acc2_g[index2]]
+        )
+
+        # --------------------------------------------------
+        # G-G TRAILS
+        # --------------------------------------------------
+
+        update_gg_trail(
+            gg_trail1,
+            lat_acc1_g,
+            lon_acc1_g,
+            index1,
+            D1_COLOUR
+        )
+
+        update_gg_trail(
+            gg_trail2,
+            lat_acc2_g,
+            lon_acc2_g,
+            index2,
+            D2_COLOUR
+        )
+
+        # --------------------------------------------------
+        # REDRAW
+        # --------------------------------------------------
+
+        left_mpl.draw_idle()
+
+        right_mpl.draw_idle()
+
+    # ======================================================
+    # G-G TRAIL UPDATE
     # ======================================================
 
     def update_gg_trail(
@@ -1667,7 +2039,6 @@ def compare_drivers(driver1, driver2, lap_number):
             )
         )
 
-        # Old sections fade; newest section is strongest
         rgba[:, 3] = np.linspace(
             0.02,
             0.80,
@@ -1681,182 +2052,6 @@ def compare_drivers(driver1, driver2, lap_number):
         collection.set_color(
             rgba
         )
-
-    def update_position(index1):
-
-        # --------------------------------------------------
-        # Match physical D2 position
-        # --------------------------------------------------
-
-        index2 = match2_for_d1[index1]
-
-        # --------------------------------------------------
-        # Tracks
-        # --------------------------------------------------
-
-        move_triangle(
-            triangle1,
-            x1,
-            y1,
-            index1
-        )
-
-        move_triangle(
-            triangle2,
-            x2,
-            y2,
-            index2
-        )
-
-        # --------------------------------------------------
-        # Track text
-        # --------------------------------------------------
-
-        text1.set_text(
-            f"D1\n"
-            f"Distance: {d1[index1]:.2f} m\n"
-            f"Speed: {s1[index1]:.1f} km/h"
-        )
-
-        text2.set_text(
-            f"D2\n"
-            f"Distance: {d2[index2]:.2f} m\n"
-            f"Speed: {s2[index2]:.1f} km/h"
-        )
-
-        # --------------------------------------------------
-        # Speed graph
-        # --------------------------------------------------
-
-        speed_arrow1.xy = (
-            d1[index1],
-            s1[index1]
-        )
-
-        speed_arrow1.set_text(
-            f"D1\n"
-            f"Distance: {d1[index1]:.2f} m\n"
-            f"Speed: {s1[index1]:.1f} km/h"
-        )
-
-        speed_arrow2.xy = (
-            d2[index2],
-            s2[index2]
-        )
-
-        speed_arrow2.set_text(
-            f"D2\n"
-            f"Distance: {d2[index2]:.2f} m\n"
-            f"Speed: {s2[index2]:.1f} km/h"
-        )
-
-        # --------------------------------------------------
-        # Control graph
-        # --------------------------------------------------
-
-        control_arrow1.xy = (
-            d1[index1],
-            brake1[index1]
-        )
-
-        control_arrow1.set_text(
-            f"D1\n"
-            f"Distance: {d1[index1]:.2f} m\n"
-            f"Brake: {brake1[index1]:.0f} Pa\n"
-            f"Throttle: {throttle1[index1]:.1f} %\n"
-            f"Long Accel: {lon_acc1[index1]:.2f} m/s²"
-        )
-
-        control_arrow2.xy = (
-            d2[index2],
-            brake2[index2]
-        )
-
-        control_arrow2.set_text(
-            f"D2\n"
-            f"Distance: {d2[index2]:.2f} m\n"
-            f"Brake: {brake2[index2]:.0f} Pa\n"
-            f"Throttle: {throttle2[index2]:.1f} %\n"
-            f"Long Accel: {lon_acc2[index2]:.2f} m/s²"
-        )
-
-        # --------------------------------------------------
-        # Time difference
-        # --------------------------------------------------
-
-        delta_arrow.xy = (
-            d1[index1],
-            delta_time[index1]
-        )
-
-        delta_arrow.set_text(
-            f"D2 - D1\n"
-            f"Distance: {d1[index1]:.2f} m\n"
-            f"Δt: {delta_time[index1]:+.3f} s"
-        )
-
-        # --------------------------------------------------
-        # Lateral G distance
-        # --------------------------------------------------
-
-        lat_distance_arrow1.xy = (
-            d1[index1],
-            lat_acc1_g[index1]
-        )
-
-        lat_distance_arrow1.set_text(
-            f"D1\n"
-            f"Distance: {d1[index1]:.2f} m\n"
-            f"Lat G: {lat_acc1_g[index1]:+.2f} g"
-        )
-
-        lat_distance_arrow2.xy = (
-            d2[index2],
-            lat_acc2_g[index2]
-        )
-
-        lat_distance_arrow2.set_text(
-            f"D2\n"
-            f"Distance: {d2[index2]:.2f} m\n"
-            f"Lat G: {lat_acc2_g[index2]:+.2f} g"
-        )
-
-        # --------------------------------------------------
-        # G-G
-        # --------------------------------------------------
-
-        gg_marker1.set_data(
-            [lat_acc1_g[index1]],
-            [lon_acc1_g[index1]]
-        )
-
-        gg_marker2.set_data(
-            [lat_acc2_g[index2]],
-            [lon_acc2_g[index2]]
-        )
-
-        update_gg_trail(
-            gg_trail1,
-            lat_acc1_g,
-            lon_acc1_g,
-            index1,
-            D1_COLOUR
-        )
-
-        update_gg_trail(
-            gg_trail2,
-            lat_acc2_g,
-            lon_acc2_g,
-            index2,
-            D2_COLOUR
-        )
-
-        # --------------------------------------------------
-        # Redraw
-        # --------------------------------------------------
-
-        left_mpl.draw_idle()
-        right_mpl.draw_idle()
 
     # ======================================================
     # TRIANGLE MOVEMENT
@@ -1884,8 +2079,15 @@ def compare_drivers(driver1, driver2, lap_number):
 
         else:
 
-            dx = x[index + 1] - x[index - 1]
-            dy = y[index + 1] - y[index - 1]
+            dx = (
+                x[index + 1]
+                - x[index - 1]
+            )
+
+            dy = (
+                y[index + 1]
+                - y[index - 1]
+            )
 
         length = np.hypot(
             dx,
@@ -2001,41 +2203,85 @@ def compare_drivers(driver1, driver2, lap_number):
                 event.ydata
             )
 
-            index1 = match1_for_d2[index2]
+            index1 = match1_for_d2[
+                index2
+            ]
 
             update_position(
                 index1
             )
 
-        elif event.inaxes == ax_gg:
+        elif event.inaxes == ax_gg1:
 
             left_dragging = True
 
-            distance1 = (
+            distances = (
                 (lat_acc1_g - event.xdata) ** 2
                 + (lon_acc1_g - event.ydata) ** 2
             )
 
-            distance2 = (
+            index1 = np.argmin(
+                distances
+            )
+
+            update_position(
+                index1
+            )
+
+        elif event.inaxes == ax_gg2:
+
+            left_dragging = True
+
+            distances = (
                 (lat_acc2_g - event.xdata) ** 2
                 + (lon_acc2_g - event.ydata) ** 2
             )
 
-            if distance1.min() <= distance2.min():
+            index2 = np.argmin(
+                distances
+            )
 
-                index1 = np.argmin(
-                    distance1
-                )
+            index1 = match1_for_d2[
+                index2
+            ]
 
-            else:
+            update_position(
+                index1
+            )
 
-                index2 = np.argmin(
-                    distance2
-                )
+        elif event.inaxes == ax_lat_speed1:
 
-                index1 = match1_for_d2[
-                    index2
-                ]
+            left_dragging = True
+
+            distances = (
+                (s1 - event.xdata) ** 2
+                + (lat_acc1_g - event.ydata) ** 2
+            )
+
+            index1 = np.argmin(
+                distances
+            )
+
+            update_position(
+                index1
+            )
+
+        elif event.inaxes == ax_lat_speed2:
+
+            left_dragging = True
+
+            distances = (
+                (s2 - event.xdata) ** 2
+                + (lat_acc2_g - event.ydata) ** 2
+            )
+
+            index2 = np.argmin(
+                distances
+            )
+
+            index1 = match1_for_d2[
+                index2
+            ]
 
             update_position(
                 index1
@@ -2076,33 +2322,69 @@ def compare_drivers(driver1, driver2, lap_number):
                 index1
             )
 
-        elif event.inaxes == ax_gg:
+        elif event.inaxes == ax_gg1:
 
-            distance1 = (
+            distances = (
                 (lat_acc1_g - event.xdata) ** 2
                 + (lon_acc1_g - event.ydata) ** 2
             )
 
-            distance2 = (
+            index1 = np.argmin(
+                distances
+            )
+
+            update_position(
+                index1
+            )
+
+        elif event.inaxes == ax_gg2:
+
+            distances = (
                 (lat_acc2_g - event.xdata) ** 2
                 + (lon_acc2_g - event.ydata) ** 2
             )
 
-            if distance1.min() <= distance2.min():
+            index2 = np.argmin(
+                distances
+            )
 
-                index1 = np.argmin(
-                    distance1
-                )
+            index1 = match1_for_d2[
+                index2
+            ]
 
-            else:
+            update_position(
+                index1
+            )
 
-                index2 = np.argmin(
-                    distance2
-                )
+        elif event.inaxes == ax_lat_speed1:
 
-                index1 = match1_for_d2[
-                    index2
-                ]
+            distances = (
+                (s1 - event.xdata) ** 2
+                + (lat_acc1_g - event.ydata) ** 2
+            )
+
+            index1 = np.argmin(
+                distances
+            )
+
+            update_position(
+                index1
+            )
+
+        elif event.inaxes == ax_lat_speed2:
+
+            distances = (
+                (s2 - event.xdata) ** 2
+                + (lat_acc2_g - event.ydata) ** 2
+            )
+
+            index2 = np.argmin(
+                distances
+            )
+
+            index1 = match1_for_d2[
+                index2
+            ]
 
             update_position(
                 index1
@@ -2137,7 +2419,9 @@ def compare_drivers(driver1, driver2, lap_number):
 
     distance_axes = [
         ax_speed,
-        ax_control,
+        ax_brake,
+        ax_throttle,
+        ax_long_distance,
         ax_delta,
         ax_lat_distance
     ]
@@ -2207,7 +2491,7 @@ def compare_drivers(driver1, driver2, lap_number):
     )
 
     # ======================================================
-    # START
+    # INITIAL POSITION
     # ======================================================
 
     update_position(
