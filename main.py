@@ -1,8 +1,11 @@
 from src.data_processing import load_data, assign_laps, assign_distance
 from src.lap_analysis import calculate_lap_times
 from src.plotting import plot_lap_times, plot_speed_map, interactive_track, compare_drivers
+import matplotlib.pyplot as plt
 
 def main():
+    plt.ion()
+
     driver1, driver2, laps = load_data()
 
     assign_laps(driver1, driver2, laps)
@@ -17,10 +20,10 @@ def main():
     # interactive_track(driver1, 2)
 
     # plot_speed_map(driver1, 3)
-
-
-
-    compare_drivers(driver1, driver2, 9)
+    while True:
+        lap_number = int(input("Enter lap number: "))
+        compare_drivers(driver1, driver2, lap_number)
+        plt.show(block=True)
 
 main()
 
