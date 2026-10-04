@@ -8,8 +8,11 @@ Scroll down the right to see more graphs.
 
 There are windows for every graph showing the value at the point.
 
+**Additional Points: **
 
-P.S. I only counted laps 2 to the penultimate lap to avoid messy data (messy start and end points)
+I only counted laps 2 to the penultimate lap to avoid messy data (messy start and end points)
 
-P.P.S. Relevant AI conversations can be provided if required. **The architecture and design of the analysis tool was from me** I'd also like to add that the **wider and larger G-G plots mean that driver 1 is able to more fully utilize the full potential of the car and it's performance evelope**
+Relevant AI conversations can be provided if required. **The architecture and design of the analysis tool was from me**
+
+I'd also like to add that the **wider and larger G-G plots mean that driver 1 is able to more fully utilize the full potential of the car and it's performance evelope**
 
