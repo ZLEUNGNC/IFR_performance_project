@@ -924,11 +924,11 @@ def compare_drivers(driver1, driver2, lap_number):
     )
 
     ax_lat_distance = right_fig.add_subplot(
-        right_gs[5, 0]
+        right_gs[4, 0]
     )
 
     ax_delta = right_fig.add_subplot(
-        right_gs[4, 0]
+        right_gs[5, 0]
     )
 
     # ======================================================

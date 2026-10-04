@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="03c0171d-93dc-430a-bab6-e9727510e592" name="Changes" comment="testing loading on seperate laptop">
-      <change beforePath="$PROJECT_DIR$/.idea/IFR_performance_project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/IFR_performance_project.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plotting.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/plotting.py" afterDir="false" />
-    </list>
+    <list default="true" id="03c0171d-93dc-430a-bab6-e9727510e592" name="Changes" comment="Final Interation likely" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -121,7 +117,7 @@
       <workItem from="1790833997824" duration="624000" />
       <workItem from="1790898067057" duration="907000" />
       <workItem from="1790898991714" duration="9236000" />
-      <workItem from="1791145251748" duration="4653000" />
+      <workItem from="1791145251748" duration="5290000" />
     </task>
     <task id="LOCAL-00001" summary="Testing commit">
       <option name="closed" value="true" />
@@ -155,7 +151,15 @@
       <option name="project" value="LOCAL" />
       <updated>1790898933059</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Final Interation likely">
+      <option name="closed" value="true" />
+      <created>1791152051856</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1791152051856</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -165,7 +169,8 @@
     <MESSAGE value="Testing commit" />
     <MESSAGE value="rejiggled files" />
     <MESSAGE value="testing loading on seperate laptop" />
-    <option name="LAST_COMMIT_MESSAGE" value="testing loading on seperate laptop" />
+    <MESSAGE value="Final Interation likely" />
+    <option name="LAST_COMMIT_MESSAGE" value="Final Interation likely" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/IFR_performance_project$data_processing.coverage" NAME="data_processing Coverage Results" MODIFIED="1791028155282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
